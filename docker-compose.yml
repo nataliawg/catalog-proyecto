@@ -1,25 +1,33 @@
-services:
-  mongodb:
-    image: mongo:4.4
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+version: '3.8'
 
-  microservice:
+services:
+  microservicio2:
     build: .
-    container_name: microservice-alojamiento-pago
-    depends_on:
-      - mongodb
+    container_name: microservicio2
     ports:
-      - "8080:8080"  # Cambia el puerto aquí a 8080
+      - "8082:8080"
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/universidad
-      - PORT=8080  # Añade esta línea para pasar el puerto correcto
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+    depends_on:
+      - db2
     volumes:
-      - ./data:/app/data
-    command: ["node", "src/app.js"]  # Asegúrate de que app.js es el punto de entrada correcto
+      - .:/app
+
+  db2:
+    image: mysql:8.0
+    container_name: db2
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
-  mongo-data:
+  db_data:
